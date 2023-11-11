@@ -1,0 +1,11 @@
+#!/bin/bash
+
+sudo apt-get install libssl-dev
+
+gcc -g -o mdg my_sha_dict_generator.c -lssl -lcrypto
+
+./mdg dict.txt dictSortie.txt
+
+gcc -o multi multiattack.c
+
+./multi  8 dictSortie.txt shadowSmall.txt

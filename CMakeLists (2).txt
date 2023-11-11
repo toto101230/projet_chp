@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.16)
+project(projet)
+
+# added -fopenmp
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+
+
+set(SOURCE_FILES main.cpp
+        projet_base/multiattack.c
+        projet_base/my_sha_dict_generator.c
+        projet_base/my_sha_shadow_generator.c)
+add_executable(projet ${SOURCE_FILES})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ssl crypto)
