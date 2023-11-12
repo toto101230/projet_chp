@@ -16,9 +16,27 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string.h>
 
 // Default maximum number of simultaneous process
 int MAX_FILS = 5;
+
+void grep(char *analyse, char *file, int i) {
+    FILE *f = fopen(file, "r");
+    if (f == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    while ((read = getline(&line, &len, f)) != -1) {
+        if (strstr(line, analyse) != NULL) {
+            printf("%s found by %d\n", line, i);
+        }
+    }
+    fclose(f);
+}
 
 //wraup for readline
 char *readline(FILE *f) {
@@ -37,7 +55,7 @@ char *readline(FILE *f) {
 int main(int argc, char *argv[]) {
     if (argc < 2)
         fprintf(stderr, "Usage: '%s' nb_of_processus dictionnary_file shasum_file num_of_process\n", argv[0]),
-        exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
 
     char *p;
@@ -50,35 +68,32 @@ int main(int argc, char *argv[]) {
     if (ds == NULL)
         exit(EXIT_FAILURE);
     char *current_password_to_analyse = readline(ds);
-    int current_checker_running = 0;
+//    int current_checker_running = 0;
 
 
-    int n = 0;
-    int id, nbrun = 0;
+    int id;
     while (current_password_to_analyse != NULL) {
-#pragma omp parallel default(none) shared(current_checker_running, current_password_to_analyse, dict_file, ds) private(id, nbrun)
+#pragma omp parallel default(none) shared(dict_file, ds) private(current_password_to_analyse, id)
         {
             id = omp_get_thread_num();
-            nbrun ++;
-//            printf("\n[INFO] Started  %dth son with id %d searching for password %s\n", nbrun, id, current_password_to_analyse);
-            current_password_to_analyse = readline(ds);
-            printf("%s\n", current_password_to_analyse);
-//            execl("/bin/grep", "grep", current_password_to_analyse, dict_file, NULL);
-            int n = fork();
-            if (n < 0) {
-                perror("fork error");
-                exit(1);
+//            printf("\n[INFO] Started proc with id %d searching for password %s\n", id, current_password_to_analyse);
+#pragma omp critical
+            {
+                current_password_to_analyse = readline(ds);
             }
-            if (n != 0) {
-//                printf("\n[INFO] Started  %dth son with id %d searching for password %s\n", nbrun, id, current_password_to_analyse);
+            if (current_password_to_analyse != NULL) {
+                printf("%s est analysé par %d\n", current_password_to_analyse, id);
+                grep(current_password_to_analyse, dict_file, id);
             } else {
-                execl("/bin/grep", "grep", current_password_to_analyse, dict_file, NULL);
+                printf("Fin de l'analyse\n");
+                exit(EXIT_SUCCESS);
             }
-            pid_t any_child;
-            wait(&any_child);
-
         }
     } // end while
+#pragma omp barrier
+    {
+        printf("Fin de l'analyse\n");
+    }
     return 0;
 }
 

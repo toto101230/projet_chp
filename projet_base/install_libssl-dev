@@ -6,6 +6,14 @@ gcc -g -o mdg my_sha_dict_generator.c -lssl -lcrypto
 
 ./mdg dict.txt dictSortie.txt
 
+gcc -g -o msg my_sha_shadow_generator.c -lssl -lcrypto
+
+./msg dictSortie.txt shadowSmall.txt
+
+
 gcc -o multi multiattack.c
 
 ./multi  8 dictSortie.txt shadowSmall.txt
+
+ gcc -g -o main main.c -fopenmp
+./main 8 projet_base/dictSortie.txt projet_base/shadowSmall.txt
