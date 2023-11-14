@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: '%s' nb_of_processus dictionnary_file shasum_file num_of_process\n", argv[0]),
                 exit(EXIT_FAILURE);
 
-    clock_t c1 = clock();
+    time_t begin = time(NULL);
 
     char *dict_file = argv[2];
     char *shasum_file = argv[3];
@@ -67,8 +67,8 @@ int main(int argc, char *argv[]) {
         }
     } // end while
     printf("Fin de l'analyse\n");
-    clock_t c2 = clock();
-    printf("Temps d'execution: %f\n", (double) (c2 - c1) / CLOCKS_PER_SEC);
+    time_t end = time(NULL);
+    printf("Temps d'execution: %ld\n", end - begin);
     return 0;
 }
 

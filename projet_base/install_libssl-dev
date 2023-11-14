@@ -18,6 +18,6 @@ gcc -o multi multiattack.c
 gcc -g -o main main.c -fopenmp -Wall
 ./main 8 projet_base/dictSortie.txt projet_base/shadowSmall.txt
 
-#pour changer le nombre de threads utilisés par openmp
+#pour changer le nombre de threads utilisés par openmp (8 par défaut)
 export OMP_NUM_THREADS=4
 
