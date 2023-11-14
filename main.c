@@ -17,7 +17,9 @@ void grep(char *analyse, char *file, int i) {
     ssize_t read;
     while ((read = getline(&line, &len, f)) != -1) {
         if (strstr(line, analyse) != NULL) {
+            line[strcspn(line, "\r\n")] = 0;
             printf("%s found by %d\n", line, i);
+            break;
         }
     }
     fclose(f);
@@ -37,9 +39,10 @@ char *readline(FILE *f) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2)
-        fprintf(stderr, "Usage: '%s' nb_of_processus dictionnary_file shasum_file num_of_process\n", argv[0]),
-                exit(EXIT_FAILURE);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: '%s' nb_of_processus dictionnary_file shasum_file num_of_process\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
     time_t begin = time(NULL);
 
