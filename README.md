@@ -1,25 +1,24 @@
-# Installer les dependances
+# Installer les dépendances
 sudo apt-get install libssl-dev
 
-# Generer un fichier dictSortie.txt qui contient pour chaque ligne le mot et son hash
+# Générer un fichier dictSortie.txt qui contient pour chaque ligne le mot et son hash
 gcc -g -o mdg my_sha_dict_generator.c -lssl -lcrypto
 ./mdg dict.txt dictSortie.txt
 
-# Generation d'un shadow
+# Génération d'un shadow de taille 20
 gcc -g -o msg my_sha_shadow_generator.c -lssl -lcrypto
 ./msg dictSortie.txt shadowSmall.txt 20
 
-# Faire tourner le code de base (non parallélisé)
+# Pour faire tourner le code de base (non parallélisé) avec 8 processus
 gcc -o multi multiattack.c
-./multi  8 dictSortie.txt shadowSmall.txt
-# Pour écupérer le temps d'execution
-time ./multi  8 dictSortie.txt shadow.txt
+./multi 8 dictSortie.txt shadowSmall.txt
 
-# Faire tourner le code optimisé (parrallélisé)
+# Pour faire tourner le code optimisé (parrallélisé avec openmp)
 gcc -g -o main main.c -fopenmp -Wall
-./main 8 projet_base/dictSortie.txt projet_base/shadowSmall.txt
-# Pour écupérer le temps d'execution
-time ./main 8 projet_base/dictSortie.txt projet_base/shadow.txt
+./main projet_base/dictSortie.txt projet_base/shadowSmall.txt
+
+# Pour afficher le temps d'exécution des deux programmes
+./script.sh
 
 # Pour changer le nombre de threads utilisés par openmp (8 par défaut)
 export OMP_NUM_THREADS=4
