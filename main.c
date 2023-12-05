@@ -49,11 +49,11 @@ int main(int argc, char *argv[]) {
 
     time_t begin = time(NULL);
 
-    char *dict_file = argv[2];
-    char *shasum_file = argv[3];
+    char *dict_file = argv[1];
+    char *shasum_file = argv[2];
     int verbose = 0;
     if (argc == 5) {
-        if (strcmp(argv[4], "-v") == 0) {
+        if (strcmp(argv[3], "-v") == 0) {
             printf("Verbose mode activated\n");
             verbose = 1;
         }
