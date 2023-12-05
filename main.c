@@ -45,6 +45,7 @@ char *readline(FILE *f) {
 int main(int argc, char *argv[]) {
 
     struct timeval start, end;
+    struct timeval start_while, end_while;
     gettimeofday(&start, NULL);
     if (argc < 3) {
         fprintf(stderr, "Usage: '%s' nb_of_processus dictionnary_file shasum_file num_of_process\n", argv[0]);
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
 
     int id;
     int nb = 0;
+    gettimeofday(&start_while, NULL);
 #pragma omp parallel default(none) shared(current_password_to_analyse, dict_file, ds, nb, verbose) private(id)
     {
         while (current_password_to_analyse != NULL) {
@@ -79,11 +81,15 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    gettimeofday(&end_while, NULL);
+    printf("Temps d'execution de la boucle while en ms: %ld\n", ((end_while.tv_sec * 1000000 + end_while.tv_usec)
+                                        - (start_while.tv_sec * 1000000 + start_while.tv_usec)));
+
     printf("Fin de l'analyse avec %d mots de passe trouvés\n", nb);
+    
     gettimeofday(&end, NULL);
     printf("Temps d'execution en ms: %ld\n", ((end.tv_sec * 1000000 + end.tv_usec)
                                         - (start.tv_sec * 1000000 + start.tv_usec)));
-    // Temps en secondes avec 6 chiffres après la virgule
     printf("Temps d'execution en s: %f\n", ((end.tv_sec * 1000000 + end.tv_usec)
                                            - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0);
     return 0;
