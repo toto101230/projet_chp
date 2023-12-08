@@ -94,6 +94,7 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < size_shadow; i++) {
             id = omp_get_thread_num();
             if (grep(shadow[i], dict, size_dict, id, verbose)==1) {
+                #pragma omp atomic
                 nb++;
             }
         }
