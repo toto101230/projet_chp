@@ -6,27 +6,43 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-int grep(char *analyse, char *file, int i, int verbose) {
-    if (analyse == NULL)
-        return 0;
-    FILE *f = fopen(file, "r");
-    if (f == NULL) {
-        perror("fopen");
+char** read_file(char *filename) {
+    FILE *f = fopen(filename, "r");
+    if (f == NULL)
         exit(EXIT_FAILURE);
-    }
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
+    int i = 0;
     while ((read = getline(&line, &len, f)) != -1) {
-        if (strstr(line, analyse) != NULL) {
+        i++;
+    }
+    char *dict[i];
+    rewind(f);
+    i = 0;
+    while ((read = getline(&line, &len, f)) != -1) {
+        line[strcspn(line, "\r\n")] = 0;
+        dict[i] = line;
+        i++;
+    }
+    fclose(f);
+    return dict;
+}
+
+int grep(char *shadow, char **dict, int size_dict, int i, int verbose) {
+
+    if (shadow == NULL)
+        return 0;
+
+    for(int i = 0; i < size_dict; i++) {
+        char* line = dict[i];
+        if (strstr(line, shadow) == 0) {
             line[strcspn(line, "\r\n")] = 0;
             if (verbose == 1)
                 printf("%s found by %d\n", line, i);
-            fclose(f);
             return 1;
         }
     }
-    fclose(f);
     return 0;
 }
 
@@ -69,31 +85,36 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    FILE *ds = fopen(shasum_file, "r");
-    if (ds == NULL)
-        exit(EXIT_FAILURE);
-    char *current_password_to_analyse = readline(ds);
+     
+    char **dict = read_file(dict_file);
+    int size_dict = sizeof(dict) / sizeof(dict[0]);
+    char **shadow = read_file(shasum_file);
+    int size_shadow = sizeof(shadow) / sizeof(shadow[0]);
 
 
     FILE *results = fopen("exec_time.txt", "a");
     if (results == NULL)
         exit(EXIT_FAILURE);
 
-
+    printf("1\n");
     int id;
     int nb = 0;
     gettimeofday(&start_while, NULL);
-    #pragma omp parallel default(none) shared(current_password_to_analyse, dict_file, ds, nb, verbose) private(id)
+    #pragma omp parallel default(none) shared(dict, size_dict, shadow, size_shadow, nb, verbose) private(id)
     {
-        while (current_password_to_analyse != NULL) {
+        for(int i = 0; i < size_shadow; i++) {
+            printf(shadow[i]);
             id = omp_get_thread_num();
-            current_password_to_analyse = readline(ds);
-            if (grep(current_password_to_analyse, dict_file, id, verbose)==1) {
+            if (grep(shadow[i], dict, size_dict, id, verbose)==1) {
                 nb++;
             }
         }
     }
-    gettimeofday(&end_while, NULL);
+    #pragma omp barrier
+    {
+        gettimeofday(&end_while, NULL);
+    }
+    
 
     printf("Fin de l'analyse avec %d mots de passe trouvés\n", nb);
     float parallel_exec_time = ((end_while.tv_sec * 1000000 + end_while.tv_usec) - (start_while.tv_sec * 1000000 + start_while.tv_usec)) / 1000000.0;
