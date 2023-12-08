@@ -35,7 +35,7 @@ int grep(char *shadow, char **dict, int size_dict, int id, int verbose) {
 
     for(int i = 0; i < size_dict; i++) {
         char* line = dict[i];
-        if (strstr(line, shadow) == 0) {
+        if (strstr(line, shadow) != NULL) {
             line[strcspn(line, "\r\n")] = 0;
             if (verbose == 1)
                 printf("%s found by %d\n", line, id);
@@ -90,6 +90,7 @@ int main(int argc, char *argv[]) {
     gettimeofday(&start_while, NULL);
     #pragma omp parallel default(none) shared(dict, size_dict, shadow, size_shadow, nb, verbose) private(id)
     {
+        #pragma omp for
         for(int i = 0; i < size_shadow; i++) {
             id = omp_get_thread_num();
             if (grep(shadow[i], dict, size_dict, id, verbose)==1) {
@@ -113,6 +114,15 @@ int main(int argc, char *argv[]) {
 
     fprintf(results, "%s\t%f\t%f\n", nb_thread, total_exec_time, parallel_exec_time);
     fclose(results);
+
+    for(int i = 0; i < size_dict; i++) {
+        free(dict[i]);
+    }
+    free(dict);
+
+    for(int i = 0; i < size_shadow; i++) {
+        free(shadow[i]);
+    }
+    free(shadow);
     return 0;
 }
-
