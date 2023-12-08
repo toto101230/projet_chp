@@ -44,6 +44,13 @@ char *readline(FILE *f) {
 
 int main(int argc, char *argv[]) {
 
+    // Récupérer le nombre de thread depuis la variable d'environnement OMP_NUM_THREADS
+    char *nb_thread = getenv("OMP_NUM_THREADS");
+    if (nb_thread == NULL) {
+        printf("La variable d'environnement OMP_NUM_THREADS n'est pas définie\n");
+        exit(EXIT_FAILURE);
+    }
+
     struct timeval start, end;
     struct timeval start_while, end_while;
     gettimeofday(&start, NULL);
@@ -68,10 +75,15 @@ int main(int argc, char *argv[]) {
     char *current_password_to_analyse = readline(ds);
 
 
+    FILE *results = fopen("exec_time.txt", "a");
+    if (results == NULL)
+        exit(EXIT_FAILURE);
+
+
     int id;
     int nb = 0;
     gettimeofday(&start_while, NULL);
-#pragma omp parallel default(none) shared(current_password_to_analyse, dict_file, ds, nb, verbose) private(id)
+    #pragma omp parallel default(none) shared(current_password_to_analyse, dict_file, ds, nb, verbose) private(id)
     {
         while (current_password_to_analyse != NULL) {
             id = omp_get_thread_num();
@@ -82,16 +94,17 @@ int main(int argc, char *argv[]) {
         }
     }
     gettimeofday(&end_while, NULL);
-    printf("Temps d'execution de la boucle while en ms: %ld\n", ((end_while.tv_sec * 1000000 + end_while.tv_usec)
-                                        - (start_while.tv_sec * 1000000 + start_while.tv_usec)));
 
     printf("Fin de l'analyse avec %d mots de passe trouvés\n", nb);
-    
+    float parallel_exec_time = ((end_while.tv_sec * 1000000 + end_while.tv_usec) - (start_while.tv_sec * 1000000 + start_while.tv_usec)) / 1000000.0;
+    printf("Temps d'execution des taches paralleles en s: %f\n", parallel_exec_time);
     gettimeofday(&end, NULL);
-    printf("Temps d'execution en ms: %ld\n", ((end.tv_sec * 1000000 + end.tv_usec)
-                                        - (start.tv_sec * 1000000 + start.tv_usec)));
-    printf("Temps d'execution en s: %f\n", ((end.tv_sec * 1000000 + end.tv_usec)
-                                           - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0);
+    float total_exec_time = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
+    printf("Temps d'execution en s: %f\n", total_exec_time);
+    printf("%f\n", total_exec_time);
+
+    fprintf(results, "%s\t%f\t%f\n", nb_thread, total_exec_time, parallel_exec_time);
+    fclose(results);
     return 0;
 }
 

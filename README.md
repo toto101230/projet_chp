@@ -1,5 +1,9 @@
 ### Installer les dépendances
+- Pour avoir la fonction de hachage SHA1:
 sudo apt-get install libssl-dev
+
+- Pour tracer les graphiques :
+avoir Python et installer matplotlib : pip install matplotlib
 
 ### Générer un fichier dictSortie.txt qui contient pour chaque ligne le mot et son hash
 gcc -g -o mdg my_sha_dict_generator.c -lssl -lcrypto
