@@ -2,35 +2,34 @@
 #include <omp.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
 #include <sys/time.h>
 
-char** read_file(char *filename) {
+char **read_file(char *filename, int *size_dict) {
     FILE *f = fopen(filename, "r");
     if (f == NULL)
         exit(EXIT_FAILURE);
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
+    int size = 0;
+    while ((read = getline(&line, &len, f)) != -1) {
+        size++;
+    }
+    char **dict = malloc(size * sizeof(char *));
+    rewind(f);
     int i = 0;
     while ((read = getline(&line, &len, f)) != -1) {
-        i++;
-    }
-    char *dict[i];
-    rewind(f);
-    i = 0;
-    while ((read = getline(&line, &len, f)) != -1) {
         line[strcspn(line, "\r\n")] = 0;
-        dict[i] = line;
+        dict[i] = malloc((strlen(line) + 1) * sizeof(char));
+        strcpy(dict[i], line);
         i++;
     }
     fclose(f);
+    *size_dict = size;
     return dict;
 }
 
-int grep(char *shadow, char **dict, int size_dict, int i, int verbose) {
-
+int grep(char *shadow, char **dict, int size_dict, int id, int verbose) {
     if (shadow == NULL)
         return 0;
 
@@ -39,23 +38,11 @@ int grep(char *shadow, char **dict, int size_dict, int i, int verbose) {
         if (strstr(line, shadow) == 0) {
             line[strcspn(line, "\r\n")] = 0;
             if (verbose == 1)
-                printf("%s found by %d\n", line, i);
+                printf("%s found by %d\n", line, id);
             return 1;
         }
     }
     return 0;
-}
-
-char *readline(FILE *f) {
-    char *line = NULL;
-
-    size_t len = 0;
-    ssize_t read;
-    if ((read = getline(&line, &len, f)) != -1) {
-        line[read - 2] = '\0';
-        return line;
-    }
-    return NULL;
 }
 
 int main(int argc, char *argv[]) {
@@ -85,25 +72,25 @@ int main(int argc, char *argv[]) {
         }
     }
 
-     
-    char **dict = read_file(dict_file);
-    int size_dict = sizeof(dict) / sizeof(dict[0]);
-    char **shadow = read_file(shasum_file);
-    int size_shadow = sizeof(shadow) / sizeof(shadow[0]);
+    char **dict = NULL;
+    int size_dict = 0;
+    dict = read_file(dict_file, &size_dict);
+
+    char **shadow = NULL;
+    int size_shadow = 0;
+    shadow = read_file(shasum_file, &size_shadow);
 
 
     FILE *results = fopen("exec_time.txt", "a");
     if (results == NULL)
         exit(EXIT_FAILURE);
 
-    printf("1\n");
     int id;
     int nb = 0;
     gettimeofday(&start_while, NULL);
     #pragma omp parallel default(none) shared(dict, size_dict, shadow, size_shadow, nb, verbose) private(id)
     {
         for(int i = 0; i < size_shadow; i++) {
-            printf(shadow[i]);
             id = omp_get_thread_num();
             if (grep(shadow[i], dict, size_dict, id, verbose)==1) {
                 nb++;
