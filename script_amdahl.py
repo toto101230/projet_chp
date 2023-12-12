@@ -16,7 +16,7 @@ while OMP_NUM_THREADS <= NB_MAX_THREAD:
     os.environ['OMP_NUM_THREADS'] = str(OMP_NUM_THREADS)
     for i in range(nb_exec):
         # Récupérer le temps d'exécution dans le fichier exec_time.txt
-        os.system(f'./main projet_base/dictSortie.txt projet_base/shadow.txt exec_time.txt')
+        os.system(f'./main projet_base/dictSortie.txt projet_base/shadowSmall.txt exec_time.txt')
     OMP_NUM_THREADS += 1
 
 # Ouvrir le fichier exec_time.txt et récupérer les données
