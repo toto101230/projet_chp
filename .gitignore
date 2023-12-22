@@ -1,2 +1,5 @@
 # Project exclude paths
 /cmake-build-debug/
+projet_base/mdg
+projet_base/msg
+projet_base/multi
