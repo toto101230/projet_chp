@@ -5,6 +5,18 @@ sudo apt-get install libssl-dev
 - Pour tracer les graphiques :
 avoir Python et installer matplotlib : pip install matplotlib
 
+### Pour tracer la loi d'Amdahl du code parallélisé (main.c)
+python script_amdahl.py
+
+### Pour tracer le graphique du temps d'exécution en fonction du nombre de processus de multiattack.c
+python script_graph_multi.py
+
+### Pour tracer le graphique du temps d'exécution en fonction du nombre de processus du code parallélisé (main.c)
+python script_exec_times.py
+
+### Pour afficher le temps d'exécution des deux programmes multiattack et main.c
+./script.sh
+
 ### Générer un fichier dictSortie.txt qui contient pour chaque ligne le mot et son hash
 gcc -g -o mdg my_sha_dict_generator.c -lssl -lcrypto
 ./mdg dict.txt dictSortie.txt
@@ -21,9 +33,5 @@ gcc -o multi multiattack.c
 gcc -g -o main main.c -fopenmp -Wall
 ./main projet_base/dictSortie.txt projet_base/shadowSmall.txt
 
-### Pour afficher le temps d'exécution des deux programmes
-./script.sh
-
 ### Pour changer le nombre de threads utilisés par openmp (8 par défaut)
 export OMP_NUM_THREADS=4
-
