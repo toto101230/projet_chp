@@ -52,6 +52,6 @@ plt.plot(range(1, NB_MAX_THREAD + 1), [results[i][0] for i in range(1, NB_MAX_TH
 plt.xlabel('Number of threads')
 plt.ylabel('Total Execution Time (s)')
 plt.title('Total Execution Time by Number of Threads')
-plt.savefig('graph_multi.png')
+plt.savefig('graph_multi.pdf')
 plt.show()
 plt.close()
